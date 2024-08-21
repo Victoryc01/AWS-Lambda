@@ -1,0 +1,119 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  PlaykosmosV2
+
+  Sample SAM Template for PlaykosmosV2
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    VpcConfig:
+      SecurityGroupIds:
+        - sg-08f14a74d6a798dd4
+      SubnetIds:
+        - subnet-05ddae7d4877bad90
+        - subnet-023e96c5a1387a1d5
+        - subnet-0b6e53c5c976841d1
+    Timeout: 20
+    Runtime: java17
+    Architectures:
+      - x86_64
+    MemorySize: 512
+
+Resources:
+  UserRegistrationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: PlaykosmosSamV2
+      Handler: playkosmos.handlers.UserRegistrationHandler::handleRequest
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaVPCAccessExecutionRole
+        - SecretsManagerReadWrite
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /register-user
+            Method: post
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: PlaykosmosSamV2
+      Handler: playkosmos.handlers.UserLoginHandler::handleRequest
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaVPCAccessExecutionRole
+        - SecretsManagerReadWrite
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /login-user
+            Method: post
+
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: PlaykosmosSamV2
+      Handler: playkosmos.handlers.App::handleRequest
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaVPCAccessExecutionRole
+        - SecretsManagerReadWrite
+      Events:
+        TestPage:
+          Type: Api
+          Properties:
+            Path: /testPage
+            Method: get
+
+  AuthsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: PlaykosmosSamV2
+      Handler: playkosmos.auth.AuthHandler::handleRequest
+      Policies:
+        - AWSLambdaExecute
+        - AWSLambdaVPCAccessExecutionRole
+        - SecretsManagerReadWrite
+
+
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  PlaykosmosApi:
+    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+  UserRegistrationFunction:
+    Description: "User Registration Function Lambda Function ARN"
+    Value: !GetAtt UserRegistrationFunction.Arn
+  UserRegistrationFunctionIamRole:
+    Description: "Implicit IAM Role created for User Registration Function"
+    Value: !GetAtt UserRegistrationFunctionRole.Arn
+
+  LoginFunction:
+    Description: "User Login Function Lambda Function ARN"
+    Value: !GetAtt UserRegistrationFunction.Arn
+  LoginFunctionIamRole:
+    Description: "Implicit IAM Role created for User Login Function"
+    Value: !GetAtt LoginFunctionRole.Arn
+
+  AppFunction:
+    Description: "App Function Lambda Function ARN"
+    Value: !GetAtt AppFunction.Arn
+  AppFunctionIamRole:
+    Description: "Implicit IAM Role created for App Function"
+    Value: !GetAtt AppFunctionRole.Arn
+
+  AuthsFunction:
+    Description: "Authorization Function Lambda Function ARN"
+    Value: !GetAtt AuthsFunction.Arn
+  AuthsFunctionIamRole:
+    Description: "Implicit IAM Role created for Authorization Function"
+    Value: !GetAtt AuthsFunction.Arn

@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'PlaykosmosV2
+
+  Sample SAM Template for PlaykosmosV2
+
+  '
+Globals:
+  Function:
+    VpcConfig:
+      SecurityGroupIds:
+      - sg-08f14a74d6a798dd4
+      SubnetIds:
+      - subnet-05ddae7d4877bad90
+      - subnet-023e96c5a1387a1d5
+      - subnet-0b6e53c5c976841d1
+    Timeout: 20
+    Runtime: java17
+    Architectures:
+    - x86_64
+    MemorySize: 512
+Resources:
+  UserRegistrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: UserRegistrationFunction
+      Handler: playkosmos.handlers.UserRegistrationHandler::handleRequest
+      Policies:
+      - AWSLambdaExecute
+      - AWSLambdaVPCAccessExecutionRole
+      - SecretsManagerReadWrite
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /register-user
+            Method: post
+    Metadata:
+      SamResourceId: UserRegistrationFunction
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: LoginFunction
+      Handler: playkosmos.handlers.UserLoginHandler::handleRequest
+      Policies:
+      - AWSLambdaExecute
+      - AWSLambdaVPCAccessExecutionRole
+      - SecretsManagerReadWrite
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /login-user
+            Method: post
+    Metadata:
+      SamResourceId: LoginFunction
+  AppFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: AppFunction
+      Handler: playkosmos.handlers.App::handleRequest
+      Policies:
+      - AWSLambdaExecute
+      - AWSLambdaVPCAccessExecutionRole
+      - SecretsManagerReadWrite
+      Events:
+        TestPage:
+          Type: Api
+          Properties:
+            Path: /testPage
+            Method: get
+    Metadata:
+      SamResourceId: AppFunction
+  AuthorizationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: AuthorizationFunction
+      Handler: playkosmos.auth.AuthorizationHandler::handleRequest
+      Policies:
+      - AWSLambdaExecute
+      - AWSLambdaVPCAccessExecutionRole
+      - SecretsManagerReadWrite
+    Metadata:
+      SamResourceId: AuthorizationFunction
+  AuthsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: AuthsFunction
+      Handler: playkosmos.auth.AuthHandler::handleRequest
+      Policies:
+      - AWSLambdaExecute
+      - AWSLambdaVPCAccessExecutionRole
+      - SecretsManagerReadWrite
+    Metadata:
+      SamResourceId: AuthsFunction
+Outputs:
+  PlaykosmosApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
+  UserRegistrationFunction:
+    Description: User Registration Function Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - UserRegistrationFunction
+      - Arn
+  UserRegistrationFunctionIamRole:
+    Description: Implicit IAM Role created for User Registration Function
+    Value:
+      Fn::GetAtt:
+      - UserRegistrationFunctionRole
+      - Arn
+  LoginFunction:
+    Description: User Login Function Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - UserRegistrationFunction
+      - Arn
+  LoginFunctionIamRole:
+    Description: Implicit IAM Role created for User Login Function
+    Value:
+      Fn::GetAtt:
+      - LoginFunctionRole
+      - Arn
+  AppFunction:
+    Description: App Function Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - AppFunction
+      - Arn
+  AppFunctionIamRole:
+    Description: Implicit IAM Role created for App Function
+    Value:
+      Fn::GetAtt:
+      - AppFunctionRole
+      - Arn
+  AuthorizationFunction:
+    Description: Authorization Function Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - AuthorizationFunction
+      - Arn
+  AuthorizationFunctionIamRole:
+    Description: Implicit IAM Role created for Authorization Function
+    Value:
+      Fn::GetAtt:
+      - AuthorizationFunction
+      - Arn
+  AuthsFunction:
+    Description: Authorization Function Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - AuthsFunction
+      - Arn
+  AuthsFunctionIamRole:
+    Description: Implicit IAM Role created for Authorization Function
+    Value:
+      Fn::GetAtt:
+      - AuthsFunction
+      - Arn
